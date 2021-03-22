@@ -1,9 +1,9 @@
 package tgnotify
 
 import (
-	"log"
 	"net/http"
 	"tgnotify/dao"
+	"tgnotify/log"
 	"tgnotify/models"
 )
 
@@ -44,7 +44,7 @@ func (sc *serviceController) ServeHTTP(rsp http.ResponseWriter, req *http.Reques
 	fc, ok := sc.svr.mp[cmd]
 	if !ok {
 		rsp.WriteHeader(http.StatusNotImplemented)
-		log.Printf("Recv unimplement cmd from user, cmd:%s\n", cmd)
+		log.Errorf("Recv unimplement cmd from user, cmd:%s", cmd)
 		return
 	}
 	user := req.Header.Get("user")
@@ -52,21 +52,22 @@ func (sc *serviceController) ServeHTTP(rsp http.ResponseWriter, req *http.Reques
 	u, succ, err := fc.OnAuth(sc.svr, user, code)
 	if err != nil {
 		rsp.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Recv cmd:%s but auth err, err:%v\n", cmd, err)
+		log.Errorf("Recv cmd:%s but auth err, err:%v", cmd, err)
 		return
 	}
 	if !succ {
 		rsp.WriteHeader(http.StatusUnauthorized)
-		log.Printf("Recv cmd:%s, auth fail, user:%s, code:%s\n", cmd, user, code)
+		log.Errorf("Recv cmd:%s, auth fail, user:%s, code:%s", cmd, user, code)
 		return
 	}
 
 	err = fc.OnDo(sc.svr, cmd, u, req, sc.svr.bot)
 	if err != nil {
-		log.Printf("Do cmd:%s cause internal err, user:%s, header:%+v, err:%v\n", cmd, user, req.Header, err)
+		log.Errorf("Do cmd:%s cause internal err, user:%s, header:%+v, err:%v", cmd, user, req.Header, err)
 		rsp.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	log.Tracef("Cmd:%s exec success, user:%s, code:%s", cmd, user, code)
 	rsp.WriteHeader(http.StatusOK)
 }
 

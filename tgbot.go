@@ -3,9 +3,9 @@ package tgnotify
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"tgnotify/config"
+	"tgnotify/log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -39,7 +39,7 @@ func (bot *TGBot) asyncUpdate() error {
 		if bot.cb != nil {
 			err = bot.cb.OnCallback(bot, &update)
 		}
-		log.Printf("Recv message from remote, sender:%d, msg:%s, proc result:%v\n",
+		log.Tracef("Recv message from remote, sender:%d, msg:%s, proc result:%v\n",
 			update.Message.Chat.ID, update.Message.Text, err)
 		if err != nil {
 			bot.WriteBot(update.Message.Chat.ID, fmt.Sprintf("[ERROR]internal err, msg:%s", err))

@@ -24,6 +24,8 @@ func main() {
 	log.Init(cfg.Log.File, log.StringToLevel(cfg.Log.Level),
 		int(cfg.Log.Count), int(cfg.Log.Size), int(cfg.Log.KeepDays), cfg.Log.WriteConsole)
 
+	log.Infof("Read config finish, config:%+v", *cfg)
+
 	err = dao.Init(&dao.DBParams{
 		Host: cfg.DB.Host,
 		Port: int(cfg.DB.Port),
