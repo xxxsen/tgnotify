@@ -27,6 +27,7 @@ func (c *CMDInfo) OnCallback(bot *tgnotify.TGBot, update *tgbotapi.Update, cmd s
 	if len(*rs) == 0 {
 		return fmt.Errorf("not found user info")
 	}
-	bot.WriteBot(update.Message.Chat.ID, fmt.Sprintf("User:%s, Code:%s", (*rs)[0].User, (*rs)[0].Code))
+	bot.WriteBot(update.Message.Chat.ID, fmt.Sprintf("User:%s, Code:%s, ChatID:%d",
+		(*rs)[0].User, (*rs)[0].Code, update.Message.Chat.ID))
 	return nil
 }
