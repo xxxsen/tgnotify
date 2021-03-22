@@ -46,7 +46,7 @@ type NotifyConfig struct {
 var nc *NotifyConfig = &NotifyConfig{
 	Log: LogConfig{
 		File:         "./tgnotify.log",
-		Level:        "debug",
+		Level:        "trace",
 		Count:        1,
 		Size:         10485760,
 		KeepDays:     1,
