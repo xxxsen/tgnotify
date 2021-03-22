@@ -3,10 +3,10 @@ package main
 
 import (
 	"flag"
-	"log"
 	"tgnotify"
 	"tgnotify/config"
 	"tgnotify/dao"
+	"tgnotify/log"
 	"tgnotify/tgcmds"
 )
 
@@ -17,8 +17,12 @@ func main() {
 	cfg := config.Global()
 	err := cfg.Parse(*conf)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
+
+	//init log
+	log.Init(cfg.Log.File, log.StringToLevel(cfg.Log.Level),
+		int(cfg.Log.Count), int(cfg.Log.Size), int(cfg.Log.KeepDays), cfg.Log.WriteConsole)
 
 	err = dao.Init(&dao.DBParams{
 		Host: cfg.DB.Host,

@@ -8,4 +8,6 @@ require (
 	github.com/go-xorm/xorm v0.7.9
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
+	github.com/sirupsen/logrus v1.8.1
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
