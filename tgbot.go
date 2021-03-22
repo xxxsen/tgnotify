@@ -4,6 +4,7 @@ package tgnotify
 import (
 	"fmt"
 	"log"
+	"strings"
 	"tgnotify/config"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -69,7 +70,26 @@ func (bot *TGBot) Start() {
 
 //WriteBot write a bot message
 func (bot *TGBot) WriteBot(id int64, message string) error {
-	_, err := bot.bot.Send(tgbotapi.NewMessage(id, message))
+	return bot.WriteModeBot(id, "", message)
+}
+
+func (bot *TGBot) detectMode(mode string) string {
+	mode = strings.ToLower(mode)
+	if mode == "html" {
+		return tgbotapi.ModeHTML
+	} else if mode == "markdown" {
+		return tgbotapi.ModeMarkdown
+	}
+	return ""
+}
+
+func (bot *TGBot) WriteModeBot(id int64, mode string, message string) error {
+	msg := tgbotapi.NewMessage(id, message)
+	mode = bot.detectMode(mode)
+	if len(mode) != 0 {
+		msg.ParseMode = mode
+	}
+	_, err := bot.bot.Send(msg)
 	if err != nil {
 		return err
 	}

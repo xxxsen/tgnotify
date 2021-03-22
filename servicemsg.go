@@ -15,7 +15,8 @@ func (sd *ServiceDoMSG) OnDo(svr *Service, cmd string, user *UserInfo, req *http
 	if err != nil {
 		return err
 	}
-	err = tgnt.WriteBot(user.ChatID, string(data))
+	mode := req.Header.Get("mode")
+	err = tgnt.WriteModeBot(user.ChatID, mode, string(data))
 	if err != nil {
 		return err
 	}
