@@ -104,7 +104,17 @@ curl -d "hello world" -H 'user: test' -H 'code: test' "https://test.com" -v
 
 ### docker-compose部署
 
-修改`.env`文件中的配置为你自己需要的配置后运行`docker-compose up -d` 拉起容器即可。
+1. 复制工程里面的dockerrun目录到你自己需要放置的位置(dockerrun目录可以改名成你自己需要的名字).
+2. 修改shell_args.sh 里面的`BOT_TOKEN`变量为你的bot的token.
+3. 运行init_config.sh, 这个shell会在当前目录下生成相关的配置.(运行后就不要再移动dockerrun了)
+4. 运行`docker-compose up -d` 来拉起容器.
+
+这里几个脚本的作用
+
+- init_config.sh 生成docker-compose.yml 运行需要的相关目录和配置
+- remove_container.sh 停止并删除docker-compose生成的容器
+- remove_folder.sh 删除init_config.sh生成的相关目录(包括DB的数据)
+
 
 ### 手工部署
 
