@@ -1,26 +1,33 @@
 package tgnotify
 
 import (
+	"flag"
 	"fmt"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+//TGCallback 回调相关的处理逻辑
 type TGCallback interface {
-	OnCallback(bot *TGBot, update *tgbotapi.Update, cmd string, params []string) error
+	GetFlags() *flag.FlagSet                              //返回自身的flagset
+	OnCallback(bot *TGBot, update *tgbotapi.Update) error //
 }
 
+//TGCallbackBuilder 由具体的子类实现
+type TGCallbackBuilder func() TGCallback
+
+//TGMSGCallback 回调集合
 type TGMSGCallback struct {
-	tgcmdmp map[string]TGCallback
+	tgcmdmp map[string]TGCallbackBuilder
 }
 
 func NewTGMSGCallback() *TGMSGCallback {
-	cmds := &TGMSGCallback{tgcmdmp: make(map[string]TGCallback)}
+	cmds := &TGMSGCallback{tgcmdmp: make(map[string]TGCallbackBuilder)}
 	return cmds
 }
 
-func (cb *TGMSGCallback) RegistMAP(full map[string]TGCallback) {
+func (cb *TGMSGCallback) RegistMAP(full map[string]TGCallbackBuilder) {
 	for cmd, proc := range full {
 		cb.tgcmdmp[cmd] = proc
 	}
@@ -41,9 +48,17 @@ func (cb *TGMSGCallback) OnCallback(bot *TGBot, update *tgbotapi.Update) error {
 	if err != nil {
 		return err
 	}
-	proc, ok := cb.tgcmdmp[cmd]
+	builder, ok := cb.tgcmdmp[cmd]
 	if !ok {
 		return fmt.Errorf("unsupported cmd:%s", cmd)
 	}
-	return proc.OnCallback(bot, update, cmd, params)
+	caller := builder()
+	fg := caller.GetFlags()
+	if fg != nil {
+		err = fg.Parse(params)
+		if err != nil {
+			return err
+		}
+	}
+	return caller.OnCallback(bot, update)
 }

@@ -1,6 +1,7 @@
 package tgcmds
 
 import (
+	"flag"
 	"fmt"
 	"tgnotify"
 	"tgnotify/dao"
@@ -10,15 +11,25 @@ import (
 )
 
 func init() {
-	Regist("/info", &CMDInfo{})
+	Regist("/info", NewCMDInfo)
 }
 
 //CMDInfo get userinfo
 type CMDInfo struct {
 }
 
+//NewCMDInfo 新的info命令自
+func NewCMDInfo() tgnotify.TGCallback {
+	return &CMDInfo{}
+}
+
+//GetFlags 获取flag
+func (c *CMDInfo) GetFlags() *flag.FlagSet {
+	return nil
+}
+
 //OnCallback oncall
-func (c *CMDInfo) OnCallback(bot *tgnotify.TGBot, update *tgbotapi.Update, cmd string, params []string) error {
+func (c *CMDInfo) OnCallback(bot *tgnotify.TGBot, update *tgbotapi.Update) error {
 	rs := &[]models.TblTgnotify{}
 	err := dao.GetEngine().SQL("select * from tbl_tgnotify where chatid = ? limit 1", update.Message.Chat.ID).Find(rs)
 	if err != nil {

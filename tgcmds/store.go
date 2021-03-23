@@ -2,12 +2,12 @@ package tgcmds
 
 import "tgnotify"
 
-var mp = make(map[string]tgnotify.TGCallback)
+var mp = make(map[string]tgnotify.TGCallbackBuilder)
 
-func Regist(cmd string, cb tgnotify.TGCallback) {
+func Regist(cmd string, cb tgnotify.TGCallbackBuilder) {
 	mp[cmd] = cb
 }
 
-func GetTGCMDS() map[string]tgnotify.TGCallback {
+func GetTGCMDS() map[string]tgnotify.TGCallbackBuilder {
 	return mp
 }
