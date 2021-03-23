@@ -14,16 +14,17 @@ func init() {
 
 //CMDDelete delete userinfo
 type CMDDelete struct {
+	fg *flag.FlagSet
 }
 
 //GetFlags 获取flag
 func (c *CMDDelete) GetFlags() *flag.FlagSet {
-	return nil
+	return c.fg
 }
 
 //NewCMDDelete 新的delete命令字
 func NewCMDDelete() tgnotify.TGCallback {
-	return &CMDDelete{}
+	return &CMDDelete{fg: flag.NewFlagSet("delete", flag.ContinueOnError)}
 }
 
 //OnCallback oncall

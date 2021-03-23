@@ -16,16 +16,17 @@ func init() {
 
 //CMDInfo get userinfo
 type CMDInfo struct {
+	fg *flag.FlagSet
 }
 
 //NewCMDInfo 新的info命令自
 func NewCMDInfo() tgnotify.TGCallback {
-	return &CMDInfo{}
+	return &CMDInfo{fg: flag.NewFlagSet("info", flag.ContinueOnError)}
 }
 
 //GetFlags 获取flag
 func (c *CMDInfo) GetFlags() *flag.FlagSet {
-	return nil
+	return c.fg
 }
 
 //OnCallback oncall
