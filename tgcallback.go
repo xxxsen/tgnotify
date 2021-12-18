@@ -1,6 +1,7 @@
 package tgnotify
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"strings"
@@ -10,8 +11,8 @@ import (
 
 //TGCallback 回调相关的处理逻辑
 type TGCallback interface {
-	GetFlags() *flag.FlagSet                              //返回自身的flagset
-	OnCallback(bot *TGBot, update *tgbotapi.Update) error //
+	GetFlags() *flag.FlagSet                                                   //返回自身的flagset
+	OnCallback(ctx context.Context, bot *TGBot, update *tgbotapi.Update) error //
 }
 
 //TGCallbackBuilder 由具体的子类实现
@@ -43,7 +44,7 @@ func (cb *TGMSGCallback) decodeText(txt string) (string, []string, error) {
 	return arrs[0], arrs[1:], nil
 }
 
-func (cb *TGMSGCallback) OnCallback(bot *TGBot, update *tgbotapi.Update) error {
+func (cb *TGMSGCallback) OnCallback(ctx context.Context, bot *TGBot, update *tgbotapi.Update) error {
 	cmd, params, err := cb.decodeText(update.Message.Text)
 	if err != nil {
 		return err
@@ -60,5 +61,5 @@ func (cb *TGMSGCallback) OnCallback(bot *TGBot, update *tgbotapi.Update) error {
 			return err
 		}
 	}
-	return caller.OnCallback(bot, update)
+	return caller.OnCallback(ctx, bot, update)
 }

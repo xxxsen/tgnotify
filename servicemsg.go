@@ -1,8 +1,11 @@
 package tgnotify
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
+	"strings"
+	"tgnotify/models"
 )
 
 //ServiceDoMSG service msg
@@ -10,13 +13,13 @@ type ServiceDoMSG struct {
 }
 
 //OnDo do logic
-func (sd *ServiceDoMSG) OnDo(svr *Service, cmd string, user *UserInfo, req *http.Request, tgnt *TGBot) error {
+func (sd *ServiceDoMSG) OnDo(ctx context.Context, svr *Service, cmd string, user *models.UserInfo, req *http.Request, tgnt *TGBot) error {
 	data, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return err
 	}
-	mode := req.Header.Get("mode")
-	err = tgnt.WriteModeBot(user.ChatID, mode, string(data))
+	mode := strings.TrimSpace(req.Header.Get("mode"))
+	err = tgnt.WriteModeBot(int64(user.Chatid), mode, string(data))
 	if err != nil {
 		return err
 	}
@@ -24,6 +27,6 @@ func (sd *ServiceDoMSG) OnDo(svr *Service, cmd string, user *UserInfo, req *http
 }
 
 //OnAuth auth logic
-func (sd *ServiceDoMSG) OnAuth(svr *Service, user string, code string) (*UserInfo, bool, error) {
-	return svr.CommonAuth(user, code)
+func (sd *ServiceDoMSG) OnAuth(ctx context.Context, svr *Service, chatid uint64, code string) (*models.UserInfo, bool, error) {
+	return svr.CommonAuth(ctx, chatid, code)
 }

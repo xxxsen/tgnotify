@@ -2,42 +2,37 @@
 package main
 
 import (
-	"flag"
 	"tgnotify"
-	"tgnotify/config"
 	"tgnotify/dao"
-	"tgnotify/log"
 	"tgnotify/tgcmds"
+
+	flag "github.com/xxxsen/envflag"
+	"github.com/xxxsen/log"
 )
 
-var conf = flag.String("conf", "./config.json", "")
+var listen = flag.String("listen", ":8333", "listen address")
+var savefile = flag.String("save_file", "./user.data", "file for saving user data")
+var logLevel = flag.String("log_level", "trace", "log level")
+var token = flag.String("token", "", "bot token")
 
 func main() {
 	flag.Parse()
-	cfg := config.Global()
-	err := cfg.Parse(*conf)
-	if err != nil {
-		panic(err)
-	}
 
 	//init log
-	log.Init(cfg.Log.File, log.StringToLevel(cfg.Log.Level),
-		int(cfg.Log.Count), int(cfg.Log.Size), int(cfg.Log.KeepDays), cfg.Log.WriteConsole)
+	log.Init("", log.StringToLevel(*logLevel),
+		0, 0, 7, true)
 
-	log.Infof("Read config finish, config:%+v", *cfg)
+	log.Infof("LISTEN:%v", *listen)
+	log.Infof("SAVE_FILE:%v", *savefile)
+	log.Infof("LOG_LEVEL:%v", *logLevel)
+	log.Infof("TOKEN:%v", *token)
 
-	err = dao.Init(&dao.DBParams{
-		Host: cfg.DB.Host,
-		Port: int(cfg.DB.Port),
-		User: cfg.DB.User,
-		Pwd:  cfg.DB.Pwd,
-		DB:   cfg.DB.DBName,
-	})
+	err := dao.Init(*savefile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	nt, err := tgnotify.NewBot(cfg)
+	nt, err := tgnotify.NewBot(*token)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,8 +51,7 @@ func main() {
 
 	//regist service msg
 	msg := &tgnotify.ServiceDoMSG{}
-	svr.Regist("msg", msg)
-	svr.Regist("", msg)
+	svr.Regist(msg, "msg", "")
 
-	svr.ServeForever(cfg.Server.Listen)
+	svr.ServeForever(*listen)
 }

@@ -1,11 +1,11 @@
 package tgcmds
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"tgnotify"
 	"tgnotify/dao"
-	"tgnotify/models"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -30,16 +30,12 @@ func (c *CMDInfo) GetFlags() *flag.FlagSet {
 }
 
 //OnCallback oncall
-func (c *CMDInfo) OnCallback(bot *tgnotify.TGBot, update *tgbotapi.Update) error {
-	rs := &[]models.TblTgnotify{}
-	err := dao.GetEngine().SQL("select * from tbl_tgnotify where chatid = ? limit 1", update.Message.Chat.ID).Find(rs)
-	if err != nil {
-		return err
+func (c *CMDInfo) OnCallback(ctx context.Context, bot *tgnotify.TGBot, update *tgbotapi.Update) error {
+	info, ok := dao.GetFileStorage().QueryUserByChatid(ctx, uint64(update.Message.Chat.ID))
+	if !ok {
+		return fmt.Errorf("not found")
 	}
-	if len(*rs) == 0 {
-		return fmt.Errorf("not found user info")
-	}
-	bot.WriteBot(update.Message.Chat.ID, fmt.Sprintf("User:%s, Code:%s, ChatID:%d",
-		(*rs)[0].User, (*rs)[0].Code, update.Message.Chat.ID))
+	bot.WriteBotf(update.Message.Chat.ID, "read info succ, chatid:%d, code:%s",
+		update.Message.Chat.ID, info.Code)
 	return nil
 }

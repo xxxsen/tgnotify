@@ -1,13 +1,14 @@
 package tgcmds
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"tgnotify"
 	"tgnotify/dao"
-	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/google/uuid"
 )
 
 func init() {
@@ -16,16 +17,12 @@ func init() {
 
 //CMDRegist regist
 type CMDRegist struct {
-	user *string
-	code *string
-	fg   *flag.FlagSet
+	fg *flag.FlagSet
 }
 
 //NewCMDRegist 新的注册命令字
 func NewCMDRegist() tgnotify.TGCallback {
 	reg := &CMDRegist{fg: flag.NewFlagSet("reg", flag.ContinueOnError)}
-	reg.user = reg.fg.String("user", "", "用户名")
-	reg.code = reg.fg.String("code", "", "密钥")
 	return reg
 }
 
@@ -35,24 +32,15 @@ func (c *CMDRegist) GetFlags() *flag.FlagSet {
 }
 
 //OnCallback oncall
-func (c *CMDRegist) OnCallback(bot *tgnotify.TGBot, update *tgbotapi.Update) error {
+func (c *CMDRegist) OnCallback(ctx context.Context, bot *tgnotify.TGBot, update *tgbotapi.Update) error {
 	chatid := update.Message.Chat.ID
-	if len(*c.user) == 0 || len(*c.code) == 0 {
-		return fmt.Errorf("invalid params, exp:/reg --user=${user} --code=${code}")
+	code := uuid.NewString()
+	if _, ok := dao.GetFileStorage().QueryUserByChatid(ctx, uint64(chatid)); ok {
+		return fmt.Errorf("already exist")
 	}
-	ts := time.Now()
-	sql := "insert ignore into tbl_tgnotify(user, code, chatid, ts) values(?, ?, ?, ?)"
-	sqlRs, err := dao.GetEngine().Exec(sql, *c.user, *c.code, chatid, ts)
-	if err != nil {
+	if err := dao.GetFileStorage().NewUser(ctx, uint64(chatid), code); err != nil {
 		return err
 	}
-	cnt, err := sqlRs.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if cnt == 0 {
-		return fmt.Errorf("already regist, try /chg to change your info")
-	}
-	bot.WriteBot(chatid, fmt.Sprintf("Regist success, user:%s, code:%s", *c.user, *c.code))
+	bot.WriteBotf(chatid, "regist success, chatid:%d, code:%s", chatid, code)
 	return nil
 }

@@ -1,6 +1,7 @@
 package tgcmds
 
 import (
+	"context"
 	"flag"
 	"tgnotify"
 	"tgnotify/dao"
@@ -28,12 +29,11 @@ func NewCMDDelete() tgnotify.TGCallback {
 }
 
 //OnCallback oncall
-func (c *CMDDelete) OnCallback(bot *tgnotify.TGBot, update *tgbotapi.Update) error {
-	sql := "delete from tbl_tgnotify where chatid = ? limit 1"
-	_, err := dao.GetEngine().Exec(sql, update.Message.Chat.ID)
-	if err != nil {
+func (c *CMDDelete) OnCallback(ctx context.Context, bot *tgnotify.TGBot, update *tgbotapi.Update) error {
+	chatid := uint64(update.Message.Chat.ID)
+	if err := dao.GetFileStorage().DeleteByChatid(context.Background(), chatid); err != nil {
 		return err
 	}
-	bot.WriteBot(update.Message.Chat.ID, "Delete user succ")
+	bot.WriteBotf(update.Message.Chat.ID, "delete account succ, chatid:%d", chatid)
 	return nil
 }

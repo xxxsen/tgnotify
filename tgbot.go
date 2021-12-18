@@ -2,27 +2,23 @@
 package tgnotify
 
 import (
+	"context"
 	"fmt"
 	"strings"
-	"tgnotify/config"
-	"tgnotify/log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/xxxsen/log"
 )
 
 //TGBot tg robot struct
 type TGBot struct {
-	bot *tgbotapi.BotAPI
-	cfg *config.NotifyConfig
-	cb  MSGCallback
+	bot   *tgbotapi.BotAPI
+	token string
+	cb    MSGCallback
 }
 
 type MSGCallback interface {
-	OnCallback(bot *TGBot, update *tgbotapi.Update) error
-}
-
-func (bot *TGBot) GetConf() *config.NotifyConfig {
-	return bot.cfg
+	OnCallback(ctx context.Context, bot *TGBot, update *tgbotapi.Update) error
 }
 
 func (bot *TGBot) asyncUpdate() error {
@@ -35,11 +31,12 @@ func (bot *TGBot) asyncUpdate() error {
 	}
 
 	for update := range updates {
+		ctx := context.Background()
 		var err error
 		if bot.cb != nil {
-			err = bot.cb.OnCallback(bot, &update)
+			err = bot.cb.OnCallback(ctx, bot, &update)
 		}
-		log.Tracef("Recv message from remote, sender:%d, msg:%s, proc result:%v",
+		log.Tracef("recv message from remote, sender:%d, msg:%s, proc result:%v",
 			update.Message.Chat.ID, update.Message.Text, err)
 		if err != nil {
 			bot.WriteBot(update.Message.Chat.ID, fmt.Sprintf("[ERROR]internal err, msg:%s", err))
@@ -49,13 +46,13 @@ func (bot *TGBot) asyncUpdate() error {
 }
 
 //NewBot create new robot
-func NewBot(cfg *config.NotifyConfig) (*TGBot, error) {
+func NewBot(token string) (*TGBot, error) {
 	//parse config
-	bot, err := tgbotapi.NewBotAPI(cfg.Bot.Token)
+	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		return nil, err
 	}
-	tg := &TGBot{bot: bot, cfg: cfg}
+	tg := &TGBot{bot: bot, token: token}
 	return tg, nil
 }
 
@@ -68,16 +65,19 @@ func (bot *TGBot) Start() {
 	go bot.asyncUpdate()
 }
 
+func (bot *TGBot) WriteBotf(id int64, formatter string, args ...interface{}) error {
+	return bot.WriteBot(id, fmt.Sprintf(formatter, args...))
+}
+
 //WriteBot write a bot message
 func (bot *TGBot) WriteBot(id int64, message string) error {
 	return bot.WriteModeBot(id, "", message)
 }
 
 func (bot *TGBot) detectMode(mode string) string {
-	mode = strings.ToLower(mode)
-	if mode == "html" {
+	if strings.EqualFold(mode, "html") {
 		return tgbotapi.ModeHTML
-	} else if mode == "markdown" {
+	} else if strings.EqualFold(mode, "markdown") {
 		return tgbotapi.ModeMarkdown
 	}
 	return ""

@@ -2,6 +2,7 @@ package tgcmds
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"fmt"
 	"strings"
@@ -33,7 +34,7 @@ func (c *CMDHelp) GetFlags() *flag.FlagSet {
 }
 
 //OnCallback oncall
-func (c *CMDHelp) OnCallback(bot *tgnotify.TGBot, update *tgbotapi.Update) error {
+func (c *CMDHelp) OnCallback(ctx context.Context, bot *tgnotify.TGBot, update *tgbotapi.Update) error {
 	if len(*c.cmd) == 0 {
 		return fmt.Errorf("exp: /help --cmd=${cmdname}")
 	}
