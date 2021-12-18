@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 	"tgnotify/dao"
 	"tgnotify/models"
 
@@ -43,8 +44,8 @@ func (sc *serviceController) ServeHTTP(rsp http.ResponseWriter, req *http.Reques
 		log.Errorf("recv unimplement cmd from user, cmd:%s", cmd)
 		return
 	}
-	user := req.Header.Get("user")
-	code := req.Header.Get("code")
+	user := strings.TrimSpace(req.Header.Get("user"))
+	code := strings.TrimSpace(req.Header.Get("code"))
 
 	chatid, err := strconv.ParseUint(user, 10, 64)
 	if err != nil {
@@ -96,6 +97,9 @@ func (svr *Service) ServeForever(ls string) error {
 func (svr *Service) CommonAuth(ctx context.Context, chatid uint64, code string) (*models.UserInfo, bool, error) {
 	info, ok := dao.GetFileStorage().QueryUserByChatid(ctx, chatid)
 	if !ok {
+		return nil, false, nil
+	}
+	if info.Code != code {
 		return nil, false, nil
 	}
 	return info, true, nil

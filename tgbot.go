@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/xxxsen/log"
 )
 
@@ -25,10 +25,7 @@ func (bot *TGBot) asyncUpdate() error {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, err := bot.bot.GetUpdatesChan(u)
-	if err != nil {
-		return err
-	}
+	updates := bot.bot.GetUpdatesChan(u)
 
 	for update := range updates {
 		ctx := context.Background()

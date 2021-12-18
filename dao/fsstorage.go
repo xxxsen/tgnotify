@@ -109,10 +109,7 @@ func (fs *FileStorage) save() error {
 	if err := ioutil.WriteFile(tmp, data, 0644); err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(fs.file, data, 0644); err != nil {
-		return err
-	}
-	return nil
+	return os.Rename(tmp, fs.file)
 }
 
 func (fs *FileStorage) initFs() error {
