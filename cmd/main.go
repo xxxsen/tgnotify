@@ -27,6 +27,10 @@ func main() {
 	log.Infof("LOG_LEVEL:%v", *logLevel)
 	log.Infof("TOKEN:%v", *token)
 
+	if len(*token) == 0 {
+		log.Fatal("invalid tg token")
+	}
+
 	err := dao.Init(*savefile)
 	if err != nil {
 		log.Fatal(err)

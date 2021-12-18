@@ -12,7 +12,12 @@ COPY --from=0 /tgnotify/cmd/tgnotify /bin/
 
 RUN apk --no-cache add ca-certificates
 
-VOLUME /config
+VOLUME /data
 EXPOSE 8333 
 
-CMD ["/bin/tgnotify", "--conf", "/config/config.json"]
+ENV LISTEN=:8333
+ENV SAVE_FILE=/data/user.data 
+ENV LOG_LEVEL=trace
+ENV TOKEN=
+
+CMD ["/bin/tgnotify"]
