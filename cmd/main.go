@@ -2,60 +2,34 @@
 package main
 
 import (
-	"tgnotify"
-	"tgnotify/dao"
-	"tgnotify/tgcmds"
+	"context"
+	"flag"
+	"log"
+	"tgnotify/config"
+	"tgnotify/server"
 
-	flag "github.com/xxxsen/envflag"
-	"github.com/xxxsen/log"
+	"github.com/xxxsen/common/logger"
+	"github.com/xxxsen/common/logutil"
+	"go.uber.org/zap"
 )
 
-var listen = flag.String("listen", ":8333", "listen address")
-var savefile = flag.String("save_file", "./user.data", "file for saving user data")
-var logLevel = flag.String("log_level", "trace", "log level")
-var token = flag.String("token", "", "bot token")
+var cfg = flag.String("config", "", "config file")
 
 func main() {
 	flag.Parse()
 
+	c, err := config.Parse(*cfg)
+	if err != nil {
+		log.Panicf("parse config fail, err:%v", err)
+	}
+
 	//init log
-	log.Init("", log.StringToLevel(*logLevel),
-		0, 0, 7, true)
-
-	log.Infof("LISTEN:%v", *listen)
-	log.Infof("SAVE_FILE:%v", *savefile)
-	log.Infof("LOG_LEVEL:%v", *logLevel)
-	log.Infof("TOKEN:%v", *token)
-
-	if len(*token) == 0 {
-		log.Fatal("invalid tg token")
-	}
-
-	err := dao.Init(*savefile)
+	logger.Init(c.Log.File, c.Log.Level, int(c.Log.FileCount), int(c.Log.FileSize), int(c.Log.KeepDays), c.Log.Console)
+	svr, err := server.New(server.WithBind(c.Listen), server.WithBotConfig(c.ChatID, c.Token), server.WithUser(c.User))
 	if err != nil {
-		log.Fatal(err)
+		logutil.GetLogger(context.Background()).With(zap.Error(err)).Fatal("init notify server fail")
 	}
-
-	nt, err := tgnotify.NewBot(*token)
-	if err != nil {
-		log.Fatal(err)
+	if err := svr.Run(); err != nil {
+		logutil.GetLogger(context.Background()).With(zap.Error(err)).Fatal("run notify server fail")
 	}
-
-	//regist callback
-	cb := tgnotify.NewTGMSGCallback()
-	cb.RegistMAP(tgcmds.GetTGCMDS())
-	nt.RegistMSGCallback(cb)
-
-	//start bot
-	nt.Start()
-	svr, err := tgnotify.NewService(nt)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//regist service msg
-	msg := &tgnotify.ServiceDoMSG{}
-	svr.Regist(msg, "msg", "")
-
-	svr.ServeForever(*listen)
 }
