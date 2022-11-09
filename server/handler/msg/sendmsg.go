@@ -4,17 +4,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"tgnotify/model"
 	"tgnotify/server/getter"
 
 	"github.com/gin-gonic/gin"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/xxxsen/common/errs"
 )
-
-type SendMessageRequest struct {
-	Message     string `json:"message"`
-	MessageType string `json:"message_type"`
-}
 
 func type2mode(typ string) string {
 	if len(typ) == 0 {
@@ -45,14 +41,14 @@ func SendMessage(c *gin.Context, ireq interface{}) (int, errs.IError, interface{
 	if err != nil {
 		return http.StatusOK, errs.Wrap(errs.ErrIO, "read msg fail", err), nil
 	}
-	return SendMessageJson(c, &SendMessageRequest{
+	return SendMessageJson(c, &model.SendMessageRequest{
 		Message:     msg,
 		MessageType: c.GetHeader("mode"),
 	})
 }
 
 func SendMessageJson(c *gin.Context, ireq interface{}) (int, errs.IError, interface{}) {
-	req := ireq.(*SendMessageRequest)
+	req := ireq.(*model.SendMessageRequest)
 	if len(req.Message) == 0 {
 		return http.StatusOK, errs.New(errs.ErrParam, "nil message"), nil
 	}

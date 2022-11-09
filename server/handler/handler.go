@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"tgnotify/model"
 	"tgnotify/server/handler/middleware"
 	"tgnotify/server/handler/msg"
 
@@ -11,6 +12,6 @@ import (
 
 func OnRegist(engine *gin.Engine) {
 	msgGroup := engine.Group("/")
-	msgGroup.POST("/", naivesvr.WrapHandler(nil, codec.CustomCodec(codec.JsonCodec, codec.NopCodec), msg.SendMessage), middleware.AuthMiddleware())
-	msgGroup.POST("/json", naivesvr.WrapHandler(&msg.SendMessageRequest{}, codec.JsonCodec, msg.SendMessageJson), middleware.AuthMiddleware())
+	msgGroup.POST("/", middleware.AuthMiddleware(), naivesvr.WrapHandler(nil, codec.CustomCodec(codec.JsonCodec, codec.NopCodec), msg.SendMessage))
+	msgGroup.POST("/json", middleware.AuthMiddleware(), naivesvr.WrapHandler(&model.SendMessageRequest{}, codec.JsonCodec, msg.SendMessageJson))
 }

@@ -1,12 +1,15 @@
 package server
 
 import (
+	"context"
 	"tgnotify/constant"
 	"tgnotify/server/handler"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/xxxsen/common/errs"
+	"github.com/xxxsen/common/logutil"
 	"github.com/xxxsen/common/naivesvr"
+	"go.uber.org/zap"
 )
 
 type NotifyServer struct {
@@ -40,5 +43,7 @@ func (s *NotifyServer) Run() error {
 	if err != nil {
 		return errs.New(errs.ErrServiceInternal, "bind http server fail", err)
 	}
+	logutil.GetLogger(context.Background()).With(zap.String("addr", s.c.addr),
+		zap.Int64("chatid", s.c.chatid), zap.Int("user_count", len(s.c.users))).Info("start running server")
 	return svr.Run()
 }
