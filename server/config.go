@@ -1,10 +1,13 @@
 package server
 
-type config struct {
-	addr   string
+type channel struct {
 	chatid int64
 	token  string
-	users  map[string]string
+}
+
+type config struct {
+	addr  string
+	users map[string]string
 }
 
 type Option func(c *config)
@@ -12,13 +15,6 @@ type Option func(c *config)
 func WithBind(addr string) Option {
 	return func(c *config) {
 		c.addr = addr
-	}
-}
-
-func WithBotConfig(chatid int64, token string) Option {
-	return func(c *config) {
-		c.chatid = chatid
-		c.token = token
 	}
 }
 

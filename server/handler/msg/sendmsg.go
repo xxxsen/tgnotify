@@ -1,11 +1,13 @@
 package msg
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"tgnotify/constant"
 	"tgnotify/model"
-	"tgnotify/server/getter"
+	"tgnotify/sender"
 
 	"github.com/gin-gonic/gin"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -41,7 +43,9 @@ func SendMessage(c *gin.Context, ireq interface{}) (int, errs.IError, interface{
 	if err != nil {
 		return http.StatusOK, errs.Wrap(errs.ErrIO, "read msg fail", err), nil
 	}
+	ch := c.GetHeader(constant.KeyChannelHeader)
 	return SendMessageJson(c, &model.SendMessageRequest{
+		Channel:     ch,
 		Message:     msg,
 		MessageType: c.GetHeader("mode"),
 	})
@@ -53,20 +57,14 @@ func SendMessageJson(c *gin.Context, ireq interface{}) (int, errs.IError, interf
 		return http.StatusOK, errs.New(errs.ErrParam, "nil message"), nil
 	}
 	mode := type2mode(req.MessageType)
-	bot := getter.MustGetBot(c)
-	chatid := getter.MustGetChatID(c)
-	if err := sendMessageInternal(bot, chatid, mode, req.Message); err != nil {
+	if err := sendMessageInternal(c, req.Channel, mode, req.Message); err != nil {
 		return http.StatusOK, errs.Wrap(errs.ErrIO, "send internal fail", err), nil
 	}
 	return http.StatusOK, errs.ErrOK, nil
 }
 
-func sendMessageInternal(bot *tgbotapi.BotAPI, id int64, mode string, message string) error {
-	msg := tgbotapi.NewMessage(id, message)
-	if len(mode) != 0 {
-		msg.ParseMode = mode
-	}
-	_, err := bot.Send(msg)
+func sendMessageInternal(ctx context.Context, ch string, mode string, message string) error {
+	err := sender.SendMessageByChannel(ctx, ch, mode, message)
 	if err != nil {
 		return errs.Wrap(errs.ErrIO, "send msg fail", err)
 	}

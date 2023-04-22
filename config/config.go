@@ -1,4 +1,4 @@
-//Package config config parser
+// Package config config parser
 package config
 
 import (
@@ -9,12 +9,18 @@ import (
 	"github.com/xxxsen/common/logger"
 )
 
+type Channel struct {
+	ChatID int64  `json:"chatid"`
+	Token  string `json:"token"`
+}
+
 type Config struct {
-	Listen string            `json:"listen"`
-	ChatID int64             `json:"chatid"`
-	Token  string            `json:"token"`
-	User   map[string]string `json:"users"`
-	Log    logger.LogConfig  `json:"log"`
+	Listen   string              `json:"listen"`
+	ChatID   int64               `json:"chatid"`
+	Token    string              `json:"token"`
+	User     map[string]string   `json:"users"`
+	Log      logger.LogConfig    `json:"log"`
+	Channels map[string]*Channel `json:"channels"`
 }
 
 func Parse(f string) (*Config, error) {
