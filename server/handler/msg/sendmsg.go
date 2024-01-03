@@ -38,10 +38,10 @@ func readmsg(c *gin.Context) (string, error) {
 	return string(data), nil
 }
 
-func SendMessage(c *gin.Context, ireq interface{}) (int, errs.IError, interface{}) {
+func SendMessage(c *gin.Context, ireq interface{}) (int, interface{}, error) {
 	msg, err := readmsg(c)
 	if err != nil {
-		return http.StatusOK, errs.Wrap(errs.ErrIO, "read msg fail", err), nil
+		return http.StatusOK, nil, errs.Wrap(errs.ErrIO, "read msg fail", err)
 	}
 	ch := c.GetHeader(constant.KeyChannelHeader)
 	return SendMessageJson(c, &model.SendMessageRequest{
@@ -51,16 +51,16 @@ func SendMessage(c *gin.Context, ireq interface{}) (int, errs.IError, interface{
 	})
 }
 
-func SendMessageJson(c *gin.Context, ireq interface{}) (int, errs.IError, interface{}) {
+func SendMessageJson(c *gin.Context, ireq interface{}) (int, interface{}, error) {
 	req := ireq.(*model.SendMessageRequest)
 	if len(req.Message) == 0 {
-		return http.StatusOK, errs.New(errs.ErrParam, "nil message"), nil
+		return http.StatusOK, nil, errs.New(errs.ErrParam, "nil message")
 	}
 	mode := type2mode(req.MessageType)
 	if err := sendMessageInternal(c, req.Channel, mode, req.Message); err != nil {
-		return http.StatusOK, errs.Wrap(errs.ErrIO, "send internal fail", err), nil
+		return http.StatusOK, nil, errs.Wrap(errs.ErrIO, "send internal fail", err)
 	}
-	return http.StatusOK, errs.ErrOK, nil
+	return http.StatusOK, nil, errs.ErrOK
 }
 
 func sendMessageInternal(ctx context.Context, ch string, mode string, message string) error {

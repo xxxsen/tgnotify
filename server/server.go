@@ -5,22 +5,14 @@ import (
 	"tgnotify/constant"
 	"tgnotify/server/handler"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/xxxsen/common/cgi"
 	"github.com/xxxsen/common/errs"
 	"github.com/xxxsen/common/logutil"
-	"github.com/xxxsen/common/naivesvr"
 	"go.uber.org/zap"
 )
 
-type botctx struct {
-	chatid int64
-	bot    **tgbotapi.BotAPI
-}
-
 type NotifyServer struct {
-	c              *config
-	bot            *botctx
-	channelsBotMap map[string]*botctx
+	c *config
 }
 
 func New(opts ...Option) (*NotifyServer, error) {
@@ -35,10 +27,10 @@ func New(opts ...Option) (*NotifyServer, error) {
 }
 
 func (s *NotifyServer) Run() error {
-	svr, err := naivesvr.NewServer(
-		naivesvr.WithAddress(s.c.addr),
-		naivesvr.WithHandlerRegister(handler.OnRegist),
-		naivesvr.WithAttach(constant.KeyUserList, s.c.users),
+	svr, err := cgi.NewServer(
+		cgi.WithAddress(s.c.addr),
+		cgi.WithHandlerRegister(handler.OnRegist),
+		cgi.WithAttach(constant.KeyUserList, s.c.users), //TODO:
 	)
 	if err != nil {
 		return errs.New(errs.ErrServiceInternal, "bind http server fail", err)
