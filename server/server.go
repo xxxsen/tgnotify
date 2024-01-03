@@ -30,10 +30,10 @@ func (s *NotifyServer) Run() error {
 	svr, err := cgi.NewServer(
 		cgi.WithAddress(s.c.addr),
 		cgi.WithHandlerRegister(handler.OnRegist),
-		cgi.WithAttach(constant.KeyUserList, s.c.users), //TODO:
+		cgi.WithAttach(constant.KeyUserList, s.c.users),
 	)
 	if err != nil {
-		return errs.New(errs.ErrServiceInternal, "bind http server fail", err)
+		return errs.Wrap(errs.ErrServiceInternal, "bind http server fail", err)
 	}
 	logutil.GetLogger(context.Background()).With(zap.String("addr", s.c.addr), zap.Int("user_count", len(s.c.users))).Info("start running server")
 	return svr.Run()

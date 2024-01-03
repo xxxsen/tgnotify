@@ -1,10 +1,5 @@
 package server
 
-type channel struct {
-	chatid int64
-	token  string
-}
-
 type config struct {
 	addr  string
 	users map[string]string
