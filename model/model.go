@@ -1,7 +1,6 @@
 package model
 
 type SendMessageRequest struct {
-	Channel     string `json:"channel"`
-	Message     string `json:"message"`
+	Message     string `json:"message" binding:"required"`
 	MessageType string `json:"message_type"`
 }
