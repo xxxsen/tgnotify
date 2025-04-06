@@ -27,7 +27,7 @@ func createMessageByKind(typ string, msg string) (message.IMessage, error) {
 		return message.NewMarkdownMessage(msg), nil
 	case message.MKindHTML:
 		return message.NewHTMLMessage(msg), nil
-	case message.MKindTGMarkdown:
+	case message.MKindTGRawMarkdown:
 		return message.NewTGMarkdownMessage(msg), nil
 	}
 	return nil, fmt.Errorf("unsupported messsage kind:%s", typ)

@@ -11,6 +11,7 @@ func (m *markdownMessage) Kind() string {
 }
 
 func (m *markdownMessage) Marshal() (string, error) {
+	//TODO: 将markdown转为tg markdown
 	return "", fmt.Errorf("no impl")
 }
 

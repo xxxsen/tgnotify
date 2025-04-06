@@ -5,7 +5,7 @@ type tgMarkdownMessage struct {
 }
 
 func (t *tgMarkdownMessage) Kind() string {
-	return MKindTGMarkdown
+	return MKindTGRawMarkdown
 }
 
 func (t *tgMarkdownMessage) Marshal() (string, error) {

@@ -31,7 +31,7 @@ func (c *botMessageSender) kind2kind(kind string) string {
 		return ""
 	case message.MKindHTML:
 		return tgbotapi.ModeHTML
-	case message.MKindMarkdown, message.MKindTGMarkdown:
+	case message.MKindMarkdown, message.MKindTGRawMarkdown:
 		return tgbotapi.ModeMarkdownV2
 	}
 	return ""

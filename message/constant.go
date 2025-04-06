@@ -1,8 +1,8 @@
 package message
 
 const (
-	MKindText       = "text"
-	MKindMarkdown   = "markdown"
-	MKindHTML       = "html"
-	MKindTGMarkdown = "tg_markdown"
+	MKindText          = "text"
+	MKindMarkdown      = "markdown"
+	MKindHTML          = "html"
+	MKindTGRawMarkdown = "tg_raw_markdown"
 )

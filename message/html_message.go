@@ -11,6 +11,7 @@ func (h *htmlMessage) Kind() string {
 }
 
 func (h *htmlMessage) Marshal() (string, error) {
+	//TODO: 将html转为tg html
 	return "", fmt.Errorf("no impl")
 }
 
